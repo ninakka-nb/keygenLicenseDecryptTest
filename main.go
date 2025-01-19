@@ -257,7 +257,9 @@ func MyValidateLicense() (bool, error) {
 	dataset, err := Decrypt(lic, LicenseKey+ClusterID)
 	switch {
 	case err == keygen.ErrMachineFileExpired:
-		// noop
+		logger.Debug().Msg("Machine file is expired!")
+		logger.Debug().Msg(fmt.Sprintf("Decrypted dataset: %+v\n", dataset))
+		return false, err
 	case err != nil:
 		logger.Debug().Msg(fmt.Sprintf("Machine file decryption failed: err=%v", err))
 		return false, err
@@ -289,13 +291,15 @@ func main() {
 		return
 	}
 
-	LicenseKey := "D8AA77-E53ADB-6009FE-151C2E-560CC0-V3"
+	LicenseKey = "D8AA77-E53ADB-6009FE-151C2E-560CC0-V3"
 
 	ClusterID = "6cdb99b0-1a72-4af4-b502-47b96df731dd"
 
 	logger.Debug().Msg("Local validation")
 	ret, err := MyValidateLicense()
-	logger.Debug().Msg(fmt.Sprintf("Return value %+v; Error: %+v\n", ret, err.Error()))
+	if err != nil {
+		logger.Debug().Msg(fmt.Sprintf("Return value %+v; Error: %+v\n", ret, err.Error()))
+	}
 
 	logger.Debug().Msg("Library validation")
 	// Verify the license file's signature
